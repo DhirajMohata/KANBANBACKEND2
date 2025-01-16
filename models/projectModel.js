@@ -22,11 +22,6 @@ const projectModel = new mongoose.Schema({
         ref: 'User',
         default: [],
     }],
-    tasks: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Task',
-        default: [],
-    }],
     createdAt: {
         type: Date,
         default: Date.now,

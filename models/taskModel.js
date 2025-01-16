@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { string } = require('zod');
 
 const taskModel = new mongoose.Schema({
     title: {
@@ -22,14 +23,14 @@ const taskModel = new mongoose.Schema({
         ref: 'User',
     },
     priority: {
-        enum: ["low", "medium", "high"],
         type: String,
-        default: "low",
     },
     status: {
         type: String,
-        default: 'todo',
-        enum: ['todo', 'inprogress', 'done'],
+    },
+    deadline: {
+        type: String,
+        required: false,
     },
     logs: [{
         action: {
@@ -52,6 +53,21 @@ const taskModel = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    comments : [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        comment: {
+            type: String,
+            required: true,
+        },
+        created_at: {
+            type: Date,
+            default: Date.now,
+        },
+        default: [],
+    }],
     subTasks: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Task',

@@ -20,7 +20,7 @@ const register = async (req, res) => {
             res.status(400).json({error : 'Error saving user: ', err});
         });
         const token = generateToken(user);
-        res.status(201).json({ token });
+        res.status(201).json({ email, role, token });
     } catch (err) {
         res.status(400).json({ error: err.errors });
     }
@@ -43,7 +43,7 @@ const login = async (req, res) => {
             return;
         }
         const token = generateToken(user);
-        res.status(200).json({ token });
+        res.status(200).json({ email, role: user.role, token });
     }
     catch (err) {
         res.status(400).json({ error: err.message });

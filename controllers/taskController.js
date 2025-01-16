@@ -1,54 +1,53 @@
 const Task = require('../models/taskModel');
+const userModel = require('../models/userModel');
 const { createTaskSchema } = require('../schemas/taskSchema');
 
 const createTask = async (req, res) => {
     try {
-        const { title, description, project, status, priority, assigned_to, assigned_by, attatchment } = createTaskSchema.parse(req.body);
+        const { title, status, project, description, priority, deadline, assigned_to, assigned_by, attatchment } = req.body;
         const task = new Task({
-            title,
-            description,
-            status,
-            project,
-            priority,
-            assigned_to,
-            assigned_by,
+            title: title,
+            description: description,
+            status: status,
+            project: project,
+            priority: priority,
+            deadline: deadline,
+            assigned_to: assigned_to,
+            assigned_by: assigned_by,
             attatchment
         });
+        console.log(req.body);
+        console.log(deadline);
+        const assigned_by_id = await userModel.findOne({ email: assigned_by });
+
+        task.assigned_by = assigned_by_id._id; 
         task.logs.push({
             action: 'Task created',
-            user: assigned_by,
+            user: task.assigned_by,
         });
-
+        console.log(task);
         await task.save();
 
-
         const { parentTaskId } = req.body;
-        console.log(parentTaskId);
         if (parentTaskId) {
             console.log(parentTaskId);
             const parentTask = await Task.findById(parentTaskId);
 
             parentTask.subTasks.push(task._id);
 
-            console.log(parentTaskId);
-
             task.logs.push({
                 action: 'Its a subtask for task : ' + parentTask.title,
                 user: assigned_by,
             });
-
             await task.save();
             
-        console.log(parentTaskId);
             parentTask.logs.push({
                 action: `Added new subtask : ${title}`,
                 user: assigned_by,
             });
             await parentTask.save();
-
-        console.log(parentTaskId);
         }
-
+        
         res.status(201).json(task);
     } catch (err) {
         res.status(400).json({ error: err.errors });
@@ -57,9 +56,8 @@ const createTask = async (req, res) => {
 
 const getTasksByProject = async (req, res) => {
     try {
-        const { project } = req.body;
-        const tasks = await Task.find({ project });
-        
+        const { projectId } = req.body;
+        const tasks = await Task.find({ project: projectId });
         res.status(200).json(tasks);
     }
     catch (err) {
