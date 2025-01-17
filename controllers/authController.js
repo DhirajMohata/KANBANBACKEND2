@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const userModel = require('../models/userModel');
+const projectModel = require('../models/projectModel');
 const { registerSchema, loginSchema } = require('../schemas/authSchema');
 const { generateToken } = require('../utils/jwtUtils');
 
@@ -16,13 +17,18 @@ const register = async (req, res) => {
             role,
         });
         console.log(user);
-        await user.save().catch(err => {
-            res.status(400).json({error : 'Error saving user: ', err});
-        });
+        await user.save();
+        var projectId = undefined;
+        var teamMembers = [];
+        if(user.role === 'manager') {
+            const managerProject = await projectModel.findOne({ manager: user._id });
+            projectId = managerProject._id;
+            teamMembers = managerProject.teamMembers;
+        }
         const token = generateToken(user);
-        res.status(201).json({ email, role, token });
+        res.status(201).json({ email, role, projectId, teamMembers, token });
     } catch (err) {
-        res.status(400).json({ error: err.errors });
+        console.log(err);
     }
 }
 
@@ -43,10 +49,22 @@ const login = async (req, res) => {
             return;
         }
         const token = generateToken(user);
-        res.status(200).json({ email, role: user.role, token });
+
+        
+        var projectId = undefined;
+        var teamMembers = [];
+
+        if(user.role === 'manager') {
+            const managerProject = await projectModel.findOne({ manager: user._id });
+            projectId = managerProject._id;
+            teamMembers = managerProject.teamMembers;
+
+        }
+        console.log(projectId);
+        res.status(200).json({ email, role: user.role, projectId, teamMembers, token });
     }
     catch (err) {
-        res.status(400).json({ error: err.message });
+        console.log(err);
     }
 }
 

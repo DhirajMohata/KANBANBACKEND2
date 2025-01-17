@@ -37,10 +37,6 @@ const taskModel = new mongoose.Schema({
             type: String,
             required: true,
         },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
         created_at: {
             type: Date,
             default: Date.now,
@@ -54,10 +50,6 @@ const taskModel = new mongoose.Schema({
         default: Date.now,
     },
     comments : [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
         comment: {
             type: String,
             required: true,
